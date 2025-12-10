@@ -1,30 +1,41 @@
+// ========================
+// Calculator State
+// ========================
+
 let currentInput = '';
 let currentOperation = '';
 let previousInput = '';
 
+// ========================
+// DOM Elements
+// ========================
+
+const display = document.getElementById('display');
+const numberButtons = document.querySelectorAll('.number-btn[data-number]');
+const operatorButtons = document.querySelectorAll('.operator-btn[data-operator]');
+const equalsButton = document.querySelector('.equal-btn');
+const deleteButton = document.getElementById('delete');
+const clearButton = document.getElementById('clear');
+
+// ========================
+// Helper Functions
+// ========================
+
 function appendNumber(number) {
     currentInput += number;
-    document.getElementById("display").textContent = `${previousInput} ${currentOperation} ${currentInput}`;
-}
-
-const numberDigit = document.querySelectorAll('.number-btn[data-number]')
-
-for (let i = 0; i < numberDigit.length; i++) {
-    const button = numberDigit[i];
-    button.addEventListener('click', () => {
-        appendNumber(button.dataset.number);
-    })
+    display.textContent = `${previousInput} ${currentOperation} ${currentInput}`;
 }
 
 function compute() {
     if (previousInput === '' || currentInput === '') return;
+
     let result;
     const prev = parseFloat(previousInput);
     const current = parseFloat(currentInput);
+
     switch (currentOperation) {
         case '+':
             result = prev + current;
-
             break;
         case '-':
             result = prev - current;
@@ -34,7 +45,7 @@ function compute() {
             break;
         case '/':
             if (current === 0) {
-                alert("Error: Division by zero");
+                alert('Error: Division by zero');
                 return;
             }
             result = prev / current;
@@ -42,34 +53,63 @@ function compute() {
         default:
             return;
     }
+
     currentInput = result.toString();
     currentOperation = '';
     previousInput = '';
-    document.getElementById("display").textContent = currentInput;
+    display.textContent = currentInput;
 }
 
-const operatorButtons = document.querySelectorAll('.operator-btn[data-operator]')
+// ========================
+// Event Listeners
+// ========================
 
-for (let i = 0; i < operatorButtons.length; i++) {
-    const operatorButton = operatorButtons[i];
-    operatorButton.addEventListener('click', () => {
+// Number buttons
+numberButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+        appendNumber(button.dataset.number);
+    });
+});
+
+// Operator buttons
+operatorButtons.forEach((button) => {
+    button.addEventListener('click', () => {
         if (currentInput === '') return;
+
         if (previousInput !== '') {
             compute();
         }
-        currentOperation = operatorButton.dataset.operator;
+
+        currentOperation = button.dataset.operator;
         previousInput = currentInput;
         currentInput = '';
-        document.getElementById("display").textContent = `${previousInput} ${currentOperation} ${currentInput}`;
-    })
-}
+        display.textContent = `${previousInput} ${currentOperation} ${currentInput}`;
+    });
+});
 
-const equalsButton = document.querySelector('.equal-btn');
-
+// Equals button
 equalsButton.addEventListener('click', () => {
     if (currentInput === '' || previousInput === '') return;
     compute();
 });
 
+// Delete button
+deleteButton.addEventListener('click', () => {
+    if (currentInput === '') return;
 
+    currentInput = currentInput.slice(0, -1);
 
+    if (currentInput === '') {
+        display.textContent = '0';
+    } else {
+        display.textContent = `${previousInput} ${currentOperation} ${currentInput}`;
+    }
+});
+
+// Clear button
+clearButton.addEventListener('click', () => {
+    currentInput = '';
+    currentOperation = '';
+    previousInput = '';
+    display.textContent = '0';
+});
